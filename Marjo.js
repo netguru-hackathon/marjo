@@ -3,108 +3,101 @@ The iio Engine is licensed under the BSD 2-clause Open Source license
 Copyright (c) 2013, Sebastian Bierman-Lytle
 All rights reserved.
 */
-function Marjo(io){
-
-	io.setBGImage('img/mario_bg.png');
-	var groundY=40;
-
-    var LEFT = 0;
-    var RIGHT = 1;
-    var UP = 2;
-    var DOWN = 3;
-    var input = [];
-
-    window.addEventListener('keydown', function(event){
-            updateInput(event, true);
-	});
-	window.addEventListener('keyup', function(event){
-            updateInput(event, false);
-	});
-
-    updateInput = function(event, boolValue){
-        if (iio.keyCodeIs('left arrow', event) || iio.keyCodeIs('a', event))
-            input[LEFT] = boolValue;
-        if (iio.keyCodeIs('right arrow', event) || iio.keyCodeIs('d', event))
-            input[RIGHT] = boolValue;
-        if (iio.keyCodeIs('up arrow', event) || iio.keyCodeIs('w', event)){
-            input[UP] = boolValue;
-            event.preventDefault();
-        }
-        if (iio.keyCodeIs('down arrow', event) || iio.keyCodeIs('s', event)){
-            input[DOWN] = boolValue;
-            event.preventDefault();
-        }
+Player = {
+  currentSpeed: 0,
+  topSpeed: 5,
+  view: null,
+  vel: [0, 0],
+  init: function(io){
+    this.view = new iio.Rect(100, 600, 50, 50);
+    this.view.setFillStyle('blue');
+    this.view.enableKinematics();
+    io.addObj(this.view);
+  },
+  moveLeft: function() {
+    this.setCurrentSpeed(this.decelerate(this.topSpeed, this.currentSpeed));
+  },
+  moveRight: function() {
+    this.setCurrentSpeed(this.accelerate(this.topSpeed, this.currentSpeed));
+  },
+  stopMoving: function() {
+    this.setCurrentSpeed(this.decelerate(0, this.currentSpeed));
+    if(this.getCurrentSpeed() < 0.2) {
+      this.setCurrentSpeed(0);
     }
+  },
+  accelerate: function(targetSpeed, currentSpeed) {
+    if (currentSpeed >= targetSpeed) {
+      return currentSpeed;
+    }
+    return currentSpeed + 0.2;
+  },
+  decelerate: function(targetSpeed, currentSpeed) {
+    if (currentSpeed <= -targetSpeed) {
+      return currentSpeed;
+    }
+    return currentSpeed - 0.2;
+  },
+  update: function() {
+    return this.view.setVel(this.vel[0], this.vel[1]);
+  },
+  setCurrentSpeed: function(val) {
+    this.vel = [val, 0];
+    return this.currentSpeed = val;
+  },
+  getCurrentSpeed: function() {
+    return this.currentSpeed;
+  }
+};
 
-	var animating=false; //prevent continuous triggering of animation
-	var marioSpeed=3;
+function Marjo(io){
+  var groundY = io.canvas.height - 5;
+  var LEFT = 0;
+  var RIGHT = 1;
+  var UP = 2;
+  var DOWN = 3;
+  var input = [];
 
-	function update(){
+  var player = Object.create(Player)
+  player.init(io);
 
-		//handle grounded mario
-		if (mario.vel.y==0){
-			if (input[LEFT] && input[RIGHT]){
-				mario.vel.x=0;
-		        mario.stopAnim('standing');
-		        animating=false;
-			}
-			else if (input[DOWN]){
-				mario.setAnim('duck');
-		        mario.vel.x=0;
-		        animating=false;
-			}
-			else if (input[LEFT]){
-				if (!animating) {
-					mario.flipImage(true);
-		        	mario.playAnim('walk',15,io);
-					animating=true;
-				}
-				mario.vel.x=-marioSpeed;
-			}
-			else if (input[RIGHT]){
-				if (!animating) {
-					mario.flipImage(false);
-		        	mario.playAnim('walk',15,io);
-		        	animating=true;
-				}
-				mario.vel.x=marioSpeed;
-			}
-			else if (mario.vel.y==0){
-				mario.vel.x=0;
-		        mario.setAnim('standing');
-		        animating=false;
-			}
-			if(input[UP]&&mario.pos.y==io.canvas.height-groundY){
-		        mario.setAnim('jump');
-		        mario.vel.add(0,-10);
-		        mario.setAcc(0, 0.3);
-		        animating=true;
-			}
-		}
-		//handle jumping mario
-		else if(mario.vel.y>0&&mario.pos.y>=io.canvas.height-groundY){
-			mario.vel.y=0;
-			mario.acc.y=0;
-			mario.pos.y=io.canvas.height-groundY;
-			animating=false;
-		}
-	}
+  window.addEventListener('keydown', function(event){
+    updateInput(event, true);
+  });
+  window.addEventListener('keyup', function(event){
+    updateInput(event, false);
+  });
 
-	var mario;
-	//create an ioSpriteMap object, define 16x32 sprite cells, pass onload function
-	// - you can redefine sprite cell dimensions any time with setSpriteRes()
-	var marioSprites = new iio.SpriteMap('img/mariobros_cmp.png',16,32,function(){
+  updateInput = function(event, boolValue){
+      if (iio.keyCodeIs('left arrow', event) || iio.keyCodeIs('a', event))
+        input[LEFT] = boolValue;
+      if (iio.keyCodeIs('right arrow', event) || iio.keyCodeIs('d', event))
+        input[RIGHT] = boolValue;
+      if (iio.keyCodeIs('up arrow', event) || iio.keyCodeIs('w', event)){
+        input[UP] = boolValue;
+        event.preventDefault();
+      }
+      if (iio.keyCodeIs('down arrow', event) || iio.keyCodeIs('s', event)){
+        input[DOWN] = boolValue;
+        event.preventDefault();
+      }
+  };
 
-		//code calls when image has loaded
-		mario = new iio.Rect(100, io.canvas.height-groundY)
-			 .createWithAnim(marioSprites.getSprite(6,6),'standing')
-			 .enableKinematics();
+  function update() {
+    if(input[LEFT]) {
+      player.moveLeft();
+    }
+    else if (input[RIGHT]) {
+      player.moveRight();
+    }
+    else {
+      player.stopMoving();
+    }
+    player.update();
+    console.log(player.view.vel);
+  }
 
-	 	mario.setVel();
-		mario.addAnim(marioSprites.getSprite(0,2),'walk');
-		mario.addAnim(marioSprites.getSprite(4,4),'jump');
-		mario.addAnim(marioSprites.getSprite(5,5),'duck');
-		io.addObj(mario);
-		io.setFramerate(60,update);
-	});
+
+
+  io.setFramerate(60, update);
 }
