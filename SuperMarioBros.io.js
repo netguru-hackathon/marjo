@@ -5,7 +5,7 @@ All rights reserved.
 */
 function SuperMarioBros(io){
 
-	io.setBGImage('img/world1-1.png');
+	io.setBGImage('img/mario_bg.png');
 	var groundY=40;
 
     var LEFT = 0;
@@ -53,12 +53,12 @@ function SuperMarioBros(io){
 				mario.vel.x=0;
 		        mario.stopAnim('standing');
 		        animating=false;
-			} 
+			}
 			else if (input[DOWN]){
 				mario.setAnim('duck');
 		        mario.vel.x=0;
 		        animating=false;
-			} 
+			}
 			else if (input[LEFT]){
 				if (!animating) {
 					mario.flipImage(true);
@@ -66,7 +66,7 @@ function SuperMarioBros(io){
 					animating=true;
 				}
 				mario.vel.x=-marioSpeed;
-			} 
+			}
 			else if (input[RIGHT]){
 				if (!animating) {
 					mario.flipImage(false);
@@ -74,7 +74,7 @@ function SuperMarioBros(io){
 		        	animating=true;
 				}
 				mario.vel.x=marioSpeed;
-			} 
+			}
 			else if (mario.vel.y==0){
 				mario.vel.x=0;
 		        mario.setAnim('standing');
