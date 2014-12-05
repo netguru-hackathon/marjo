@@ -3,7 +3,7 @@ The iio Engine is licensed under the BSD 2-clause Open Source license
 Copyright (c) 2013, Sebastian Bierman-Lytle
 All rights reserved.
 */
-function SuperMarioBros(io){
+function Marjo(io){
 
 	io.setBGImage('img/mario_bg.png');
 	var groundY=40;
