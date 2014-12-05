@@ -36,14 +36,8 @@ function Marjo(io){
         }
     }
 
-	//Print instructions
-	io.addObj(new iio.Text('Use aswd or the arrow keys to move, jump, and duck', iio.Vec.add(io.canvas.center,0,6))
-              .setFont('30px Consolas')
-              .setTextAlign('center')
-              .setFillStyle('black'));
-
 	var animating=false; //prevent continuous triggering of animation
-	var marioSpeed=1;
+	var marioSpeed=3;
 
 	function update(){
 
@@ -82,7 +76,7 @@ function Marjo(io){
 			}
 			if(input[UP]&&mario.pos.y==io.canvas.height-groundY){
 		        mario.setAnim('jump');
-		        mario.vel.add(0,-5);
+		        mario.vel.add(0,-10);
 		        mario.setAcc(0, 0.3);
 		        animating=true;
 			}
